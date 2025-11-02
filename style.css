@@ -1,0 +1,7 @@
+body { font-family: sans-serif; text-align: center; background: #eef; margin:0; padding:0;}
+canvas { border: 1px solid #333; margin-top: 10px; display:block; margin-left:auto; margin-right:auto;}
+#windIndicator, #score { margin: 10px; font-weight: bold; }
+button { margin-top: 10px; padding: 5px 10px; font-size: 16px; cursor: pointer;}
+input { width: 60px; margin-bottom: 5px;}
+#zoomSlider { margin:10px; }
+#windCanvas { border:1px solid #333; background: #eef; }
