@@ -1,16 +1,28 @@
-const CACHE_NAME = 'wind-game-cache-v1';
-const urlsToCache = [
+const CACHE_NAME = 'wind-training-v1';
+const FILES_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './main.js',
-  './manifest.json'
+  './manifest.json',
+  './icons/web-app-manifest-192x192.png',
+  './icons/web-app-manifest-512x512.png'
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+self.addEventListener('install', evt => {
+  evt.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE)));
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
+self.addEventListener('activate', evt => {
+  evt.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', evt => {
+  if (evt.request.method !== 'GET') return;
+  evt.respondWith(
+    caches.match(evt.request).then(hit => hit || fetch(evt.request).then(resp => {
+      return caches.open(CACHE_NAME).then(cache => { cache.put(evt.request, resp.clone()); return resp; });
+    }))
+  );
 });
