@@ -1,5 +1,5 @@
 // ---------------------------
-// Wind Training — Silhouette PWA
+// Wind Training — Silhouette PWA (High Detail)
 // ---------------------------
 
 const targetCanvas = document.getElementById('targetCanvas');
@@ -25,60 +25,50 @@ const windText = document.getElementById('windText');
 const distanceDisplay = document.getElementById('distanceDisplay');
 
 // ---------------------------
-// Game State
+// Game state
 // ---------------------------
-let competition = {
-  current:0,
-  totalTargets:20,
-  score:0,
-  mode:'competition'
-};
-
+let competition = {current:0,totalTargets:20,score:0,mode:'competition'};
 let targets = [];
 let currentTarget = null;
-
-let wind = {speed:0, direction:0, gustTarget:0, dirTarget:0};
+let wind = {speed:0,direction:0,gustTarget:0,dirTarget:0};
 let windSettings = {baseSpeed:5,maxGust:3,maxLull:2,maxDirSwing:15};
+let shotTraces = [];
 
 // ---------------------------
-// Helpers
+// Utility
 // ---------------------------
 function rand(min,max){ return Math.random()*(max-min)+min; }
 function degToRad(d){ return d*Math.PI/180; }
-
 function hitZoneFromDistance(m){
-  if(m<20) return 15*0.7;
-  if(m<35) return 25*0.7;
-  return 40*0.7;
+  if(m<20) return 15*0.7; // ~10px
+  if(m<35) return 25*0.7; // ~17px
+  return 40*0.7;           // ~28px
 }
 
 // ---------------------------
-// Wind System
+// Wind
 // ---------------------------
 function initWindForTarget(base){
   wind.speed = base;
   wind.direction = rand(0,360);
   setNewWindTargets();
 }
-
 function setNewWindTargets(){
   wind.gustTarget = wind.speed + rand(-windSettings.maxLull,windSettings.maxGust);
   wind.dirTarget = wind.direction + rand(-windSettings.maxDirSwing,windSettings.maxDirSwing);
   setTimeout(setNewWindTargets,rand(1000,3000));
 }
-
 function updateWind(){
   wind.speed += (wind.gustTarget-wind.speed)*0.05;
   wind.direction += (wind.dirTarget-wind.direction)*0.05;
 }
-
 function drawWindIndicator(){
-  const r = 30, cx = windCanvas.width/2, cy = windCanvas.height/2;
+  const r = 30, cx=windCanvas.width/2, cy=windCanvas.height/2;
   const dir = degToRad(wind.direction);
   wctx.clearRect(0,0,windCanvas.width,windCanvas.height);
   wctx.beginPath();
   wctx.moveTo(cx,cy);
-  wctx.lineTo(cx+r*Math.cos(dir), cy+r*Math.sin(dir));
+  wctx.lineTo(cx+r*Math.cos(dir),cy+r*Math.sin(dir));
   wctx.strokeStyle='#333';
   wctx.lineWidth=3;
   wctx.stroke();
@@ -86,17 +76,44 @@ function drawWindIndicator(){
 }
 
 // ---------------------------
-// Targets
+// Background
+// ---------------------------
+function drawBackground(){
+  const grd = ctx.createLinearGradient(0,0,0,targetCanvas.height);
+  grd.addColorStop(0,'#87CEEB'); // sky
+  grd.addColorStop(0.6,'#87CEEB');
+  grd.addColorStop(1,'#228B22'); // grass
+  ctx.fillStyle = grd;
+  ctx.fillRect(0,0,targetCanvas.width,targetCanvas.height);
+}
+
+// ---------------------------
+// Silhouettes (inline SVG paths)
 // ---------------------------
 const silhouettePaths = {
-  rat: "M -25,10 Q -10,5 0,0 Q 10,-10 25,-5 Q 20,10 -25,10 Z",
+  rat:"M -25,10 Q -10,5 0,0 Q 10,-10 25,-5 Q 20,10 -25,10 Z",
   crow:"M -20,10 Q -10,-15 0,-20 Q 10,-5 25,0 Q 15,10 -20,10 Z",
   rabbit:"M -18,10 Q -5,-20 0,-25 Q 5,-20 18,10 Z",
   squirrel:"M -20,10 Q -10,-5 0,-15 Q 15,-10 25,10 Z"
 };
-
+const silhouetteColors = {
+  rat:'#444', crow:'#222', rabbit:'#666', squirrel:'#555'
+};
 const silhouetteTypes = ['rat','crow','rabbit','squirrel'];
 
+function drawSilhouette(type,x,y,scale){
+  const path=new Path2D(silhouettePaths[type]||silhouettePaths.rat);
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(scale,scale);
+  ctx.fillStyle=silhouetteColors[type]||'#333';
+  ctx.fill(path);
+  ctx.restore();
+}
+
+// ---------------------------
+// Build Targets
+// ---------------------------
 function buildTargets(num){
   targets=[];
   for(let i=0;i<num;i++){
@@ -113,28 +130,18 @@ function buildTargets(num){
     };
     targets.push(t);
   }
-  currentTarget = targets[0];
-}
-
-function drawSilhouette(type,x,y,scale){
-  const path=new Path2D(silhouettePaths[type]||silhouettePaths.rat);
-  ctx.save();
-  ctx.translate(x,y);
-  ctx.scale(scale,scale);
-  ctx.fillStyle='#333';
-  ctx.fill(path);
-  ctx.restore();
+  currentTarget=targets[0];
 }
 
 // ---------------------------
-// Shooting
+// Shooting & Traces
 // ---------------------------
 function shoot(x,y){
   if(currentTarget.shotTaken) return;
-  currentTarget.shotTaken = true;
+  currentTarget.shotTaken=true;
 
   const windDrift = (wind.speed/10)*(currentTarget.distanceMeters/20)*Math.cos(degToRad(wind.direction));
-  const impactX = currentTarget.x + windDrift*40;
+  const impactX = currentTarget.x+windDrift*40;
   const impactY = currentTarget.y;
 
   const dx = impactX-currentTarget.x;
@@ -145,13 +152,15 @@ function shoot(x,y){
   else if(dist<currentTarget.killRadiusPx*1.5){currentTarget.result='split';competition.score+=1;}
   else{currentTarget.result='miss';}
 
+  shotTraces.push({x1:targetCanvas.width/2,y1:targetCanvas.height/2,x2:impactX,y2:impactY,alpha:1});
+
   scoreEl.textContent = competition.score;
   nextBtn.disabled=false;
   renderAll(impactX,impactY,currentTarget.result);
 }
 
 // ---------------------------
-// Render Loop
+// Reticle & Rendering
 // ---------------------------
 function drawReticle(){
   const cx=targetCanvas.width/2, cy=targetCanvas.height/2;
@@ -162,39 +171,55 @@ function drawReticle(){
   ctx.moveTo(0,cy); ctx.lineTo(targetCanvas.width,cy);
   ctx.stroke();
   ctx.beginPath();
-  ctx.arc(cx,cy,10,0,Math.PI*2);
-  ctx.stroke();
+  ctx.arc(cx,cy,10,0,Math.PI*2); ctx.stroke();
 }
 
 function renderAll(impactX=null,impactY=null,result=null){
-  ctx.clearRect(0,0,targetCanvas.width,targetCanvas.height);
-  drawSilhouette(currentTarget.silhouetteType,currentTarget.x,currentTarget.y,4);
+  drawBackground();
+  // draw shot traces
+  shotTraces.forEach(t=>{
+    ctx.strokeStyle=`rgba(255,0,0,${t.alpha})`;
+    ctx.lineWidth=2;
+    ctx.beginPath();
+    ctx.moveTo(t.x1,t.y1);
+    ctx.lineTo(t.x2,t.y2);
+    ctx.stroke();
+    t.alpha*=0.95;
+  });
+  shotTraces = shotTraces.filter(t=>t.alpha>0.05);
+
+  // scale by distance
+  const scale = 50/currentTarget.distanceMeters;
+  drawSilhouette(currentTarget.silhouetteType,currentTarget.x,currentTarget.y,scale);
+
+  // hit zone
   ctx.beginPath();
   ctx.arc(currentTarget.x,currentTarget.y,currentTarget.killRadiusPx,0,Math.PI*2);
-  ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.8)';
+  ctx.lineWidth=2; ctx.stroke();
 
-  if(impactX){
-    ctx.beginPath();
-    ctx.arc(impactX,impactY,5,0,Math.PI*2);
-    ctx.fillStyle=result==='hit'?'#0f0':result==='split'?'#ffa500':'#f00';
-    ctx.fill();
-  }
   drawReticle();
   distanceDisplay.textContent = `Distance: ${currentTarget.distanceMeters.toFixed(0)} m`;
 }
 
+// ---------------------------
+// Canvas Input
+// ---------------------------
 targetCanvas.addEventListener('mouseup', e=>{
-  const rect=targetCanvas.getBoundingClientRect();
+  const rect = targetCanvas.getBoundingClientRect();
   shoot(e.clientX-rect.left,e.clientY-rect.top);
 });
 targetCanvas.addEventListener('touchend', e=>{
-  const rect=targetCanvas.getBoundingClientRect();
-  const t=e.changedTouches[0];
+  const rect = targetCanvas.getBoundingClientRect();
+  const t = e.changedTouches[0];
   shoot(t.clientX-rect.left,t.clientY-rect.top);
 });
 
+// ---------------------------
+// Animation Loop
+// ---------------------------
 function loop(){
-  if(!currentTarget)return requestAnimationFrame(loop);
+  if(!currentTarget) return requestAnimationFrame(loop);
   updateWind();
   drawWindIndicator();
   if(!currentTarget.shotTaken) renderAll();
