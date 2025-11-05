@@ -1,7 +1,29 @@
-body { font-family: sans-serif; text-align: center; background: #eef; margin:0; padding:0;}
-canvas { border: 1px solid #333; margin-top: 10px; display:block; margin-left:auto; margin-right:auto;}
-#windIndicator, #score { margin: 10px; font-weight: bold; }
-button { margin-top: 10px; padding: 5px 10px; font-size: 16px; cursor: pointer;}
-input { width: 60px; margin-bottom: 5px;}
-#zoomSlider { margin:10px; }
-#windCanvas { border:1px solid #333; background: #eef; }
+:root{
+  --bg:#eef2f6;
+  --panel:#ffffff;
+  --accent:#0b6b3a;
+  --muted:#666;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial; background:var(--bg); color:#111}
+header{padding:14px 18px;background:linear-gradient(90deg,#0c6b3a22,transparent);border-bottom:1px solid #d8e3dc}
+h1{margin:0;font-size:20px}
+main{padding:16px; max-width:1100px;margin:0 auto}
+section{background:var(--panel); padding:14px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.06); margin-bottom:12px}
+.hidden{display:none}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.row.small{margin-top:8px}
+label{font-size:14px;color:var(--muted)}
+input[type=number]{width:96px;padding:6px;border:1px solid #cfd8d3;border-radius:6px;margin-left:8px}
+button{background:var(--accent); color:white;border:none;padding:8px 12px;border-radius:6px;font-weight:600;cursor:pointer}
+button[disabled]{opacity:0.5;cursor:not-allowed}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+.hud{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+#windWidget{display:flex;align-items:center;gap:8px}
+#windText{font-weight:700}
+.canvas-wrap{display:flex;justify-content:center;align-items:center;background:linear-gradient(#f6faf8,#eef6f2);padding:10px;border-radius:6px}
+canvas{background:transparent}
+.controls{display:flex;gap:12px;justify-content:center;margin-top:10px}
+footer{padding:12px;text-align:center;color:var(--muted);font-size:13px}
+#info{font-weight:600}
