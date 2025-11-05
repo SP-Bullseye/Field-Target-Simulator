@@ -1,45 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wind Training Game</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wind Training — Silhouette Competition</title>
 <link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/web-app-manifest-192x192.png">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/web-app-manifest-192x192.png">
 </head>
 <body>
-<h1>Wind Training Game</h1>
+  <header>
+    <h1>Wind Training — Silhouette Competition</h1>
+  </header>
 
-<!-- Setup Panel -->
-<div id="setup">
-  <h2>Setup Wind Conditions</h2>
-  <label>Base Wind Speed (m/s): <input type="number" id="baseSpeed" value="5"></label><br>
-  <label>Max Gust: <input type="number" id="maxGust" value="3"></label><br>
-  <label>Max Lull: <input type="number" id="maxLull" value="2"></label><br>
-  <label>Max Direction Swing (°): <input type="number" id="maxDirSwing" value="15"></label><br>
-  <label>Zero Range Distance (m): <input type="number" id="zeroRange" value="10"></label><br>
-  <button id="startGame">Start Game</button>
-</div>
+  <main>
+    <section id="setup">
+      <h2>Setup</h2>
+      <div class="row">
+        <label>Base Wind Speed (m/s):
+          <input id="baseSpeed" type="number" step="0.1" value="5">
+        </label>
+        <label>Max Gust (m/s):
+          <input id="maxGust" type="number" step="0.1" value="3">
+        </label>
+        <label>Max Lull (m/s):
+          <input id="maxLull" type="number" step="0.1" value="2">
+        </label>
+        <label>Max Direction Swing (°):
+          <input id="maxDirSwing" type="number" value="15">
+        </label>
+      </div>
 
-<!-- Game Panel -->
-<div id="game" style="display:none; position:relative;">
-  <canvas id="targetCanvas" width="600" height="400"></canvas>
-  <canvas id="windCanvas" width="100" height="100" style="position:absolute; top:10px; left:10px;"></canvas>
-  
-  <div id="windIndicator">
-    Wind: <span id="windSpeed"></span> m/s,
-    <span id="windDir"></span>°
-  </div>
-  
-  <div id="score">Score: <span id="scoreValue">0</span></div>
-  
-  <label>Zoom:
-    <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1">
-  </label>
-  
-  <button id="nextTarget">Next Target</button>
-</div>
+      <div class="row small">
+        <button id="startBtn">Start Competition (20 Targets)</button>
+        <button id="practiceBtn">Zero-Range Practice</button>
+      </div>
+
+      <p class="hint">Tap or click inside the target canvas to <strong>release</strong> a shot. Wind changes while you aim; it freezes at the shot moment. Use "Next" to advance.</p>
+    </section>
+
+    <section id="game" class="hidden">
+      <div class="hud">
+        <div id="windWidget">
+          <canvas id="windCanvas" width="90" height="90" aria-label="Wind indicator"></canvas>
+          <div id="windText">— m/s • —°</div>
+        </div>
+
+        <div id="info">
+          <div>Target <span id="targetIndex">1</span> / 20</div>
+          <div>Score: <span id="score">0</span></div>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="targetCanvas" width="900" height="500" aria-label="Target area"></canvas>
+      </div>
+
+      <div class="controls">
+        <button id="nextBtn" disabled>Next Target</button>
+        <button id="endBtn">End Competition</button>
+      </div>
+    </section>
+
+    <section id="results" class="hidden">
+      <h2>Competition Results</h2>
+      <p>Final Score: <strong id="finalScore">0</strong></p>
+      <button id="restartBtn">Restart</button>
+    </section>
+  </main>
+
+  <footer>
+    <small>Original-style silhouette competition — fully original code. PWA-ready.</small>
+  </footer>
 
 <script src="main.js"></script>
 </body>
