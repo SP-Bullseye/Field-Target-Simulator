@@ -14,6 +14,7 @@
   </header>
 
   <main>
+    <!-- Setup phase -->
     <section id="setup">
       <h2>Setup</h2>
       <div class="row">
@@ -36,13 +37,14 @@
         <button id="practiceBtn">Zero-Range Practice</button>
       </div>
 
-      <p class="hint">Tap or click inside the target canvas to <strong>release</strong> a shot. Wind changes while you aim; it freezes at the shot moment. Use "Next" to advance.</p>
+      <p class="hint">Tap or click inside the target canvas to <strong>release</strong> a shot. Wind changes while you aim; it freezes when you shoot. Press "Next Target" to advance.</p>
     </section>
 
+    <!-- Game phase -->
     <section id="game" class="hidden">
       <div class="hud">
         <div id="windWidget">
-          <canvas id="windCanvas" width="90" height="90" aria-label="Wind indicator"></canvas>
+          <canvas id="windCanvas" width="90" height="90"></canvas>
           <div id="windText">— m/s • —°</div>
         </div>
 
@@ -53,7 +55,7 @@
       </div>
 
       <div class="canvas-wrap">
-        <canvas id="targetCanvas" width="900" height="500" aria-label="Target area"></canvas>
+        <canvas id="targetCanvas" width="900" height="500"></canvas>
       </div>
 
       <div class="controls">
@@ -62,6 +64,7 @@
       </div>
     </section>
 
+    <!-- Results -->
     <section id="results" class="hidden">
       <h2>Competition Results</h2>
       <p>Final Score: <strong id="finalScore">0</strong></p>
@@ -70,7 +73,7 @@
   </main>
 
   <footer>
-    <small>Original-style silhouette competition — fully original code. PWA-ready.</small>
+    <small>Silhouette wind training — PWA-ready, no external dependencies.</small>
   </footer>
 
 <script src="main.js"></script>
